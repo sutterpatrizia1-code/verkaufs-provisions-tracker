@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#13294b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Verkaufs-Tracker">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Verkaufs- & Provisions-Tracker</title>
+<style>
+:root{
+  --bg:#f3f6fa;--card:#fff;--ink:#132238;--muted:#69778a;--line:#d9e2ec;
+  --navy:#13294b;--navy2:#0d1f3a;--teal:#0f766e;--teal2:#115e59;
+  --green:#166534;--red:#b91c1c;--amber:#92400e;--soft:#e8eef5;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+header{background:var(--navy);color:#fff;padding:16px;position:sticky;top:0;z-index:20;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.header-row{max-width:1180px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.header-title{font-weight:800;font-size:1.1rem}
+.header-sub{font-size:.78rem;color:#cbd5e1;margin-top:2px}
+.install-btn{border:1px solid #9fb2ca;background:#1f3b66;color:#fff;padding:9px 12px;border-radius:10px;font-weight:700;display:none}
+main{max-width:1180px;margin:auto;padding:14px 14px 90px}
+.nav{display:flex;gap:8px;overflow:auto;padding:10px 0 14px;position:sticky;top:71px;background:linear-gradient(var(--bg),var(--bg));z-index:15}
+.nav button{white-space:nowrap;border:0;border-radius:999px;padding:10px 14px;background:#e4eaf1;color:#334155;font-weight:700}
+.nav button.active{background:var(--navy);color:white}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(15,23,42,.04);margin-bottom:12px}
+.card h2,.card h3{margin:0 0 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}
+.metric small{display:block;color:var(--muted);font-size:.77rem}
+.metric strong{display:block;font-size:1.2rem;margin-top:3px}
+.metric .hint{font-size:.73rem;color:var(--muted);margin-top:3px}
+label{display:block;font-size:.82rem;font-weight:700;margin-bottom:5px}
+.field{margin-bottom:10px}
+input,select,textarea{width:100%;border:1px solid #cbd5e1;background:#fff;border-radius:11px;padding:11px 12px;min-height:44px;color:var(--ink)}
+textarea{min-height:84px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(15,118,110,.18);border-color:var(--teal)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}
+.btn{border:0;border-radius:11px;padding:11px 14px;font-weight:800}
+.btn.primary{background:var(--teal);color:#fff}
+.btn.primary:hover{background:var(--teal2)}
+.btn.secondary{background:#e2e8f0;color:#0f172a}
+.btn.danger{background:#fee2e2;color:#991b1b}
+.btn.navy{background:var(--navy);color:#fff}
+.btn.outline{background:#fff;border:1px solid var(--line);color:#334155}
+.notice{padding:10px 12px;border-radius:11px;font-size:.88rem;margin:10px 0}
+.notice.info{background:#e8f1fb;color:#23446d}
+.notice.good{background:#dcfce7;color:#166534}
+.notice.warn{background:#fff7ed;color:#9a3412}
+.notice.bad{background:#fee2e2;color:#991b1b}
+.hidden{display:none!important}
+.section{display:none}
+.section.active{display:block}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 6px;border-bottom:1px solid #e8edf3;text-align:left;vertical-align:top}
+th{font-size:.76rem;color:var(--muted)}
+td.num,th.num{text-align:right}
+.table-wrap{overflow:auto}
+.monthbar{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.monthbar select{width:auto;min-width:180px}
+.progress{height:10px;border-radius:999px;background:#e2e8f0;overflow:hidden;margin-top:7px}
+.progress > div{height:100%;background:var(--teal);width:0}
+.kpi-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rule{border:1px solid var(--line);border-radius:12px;padding:10px;margin-bottom:8px;background:#fafcfe}
+.rule-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr auto;gap:8px;align-items:end}
+.rule-grid.prov{grid-template-columns:1fr 1fr 1fr auto}
+.mini{font-size:.78rem;color:var(--muted)}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#e2e8f0;color:#334155;font-size:.73rem;font-weight:800}
+.entry-card{border:1px solid var(--line);border-radius:12px;padding:11px;margin-bottom:9px;background:#fff}
+.entry-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.entry-values{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.entry-values div{background:#f8fafc;border-radius:9px;padding:7px}
+.entry-values small{display:block;color:var(--muted);font-size:.68rem}
+.entry-values strong{font-size:.84rem}
+.onboarding{max-width:720px;margin:20px auto}
+.hero{background:linear-gradient(135deg,#13294b,#1d4778);color:white;border-radius:18px;padding:20px;margin-bottom:12px}
+.hero h1{margin:0 0 6px;font-size:1.65rem}
+.hero p{margin:0;color:#d9e6f5}
+.step{display:none}
+.step.active{display:block}
+.step-dots{display:flex;gap:6px;margin:10px 0}
+.step-dots span{width:9px;height:9px;border-radius:50%;background:#cbd5e1}
+.step-dots span.active{background:var(--teal)}
+.footer-note{text-align:center;color:#94a3b8;font-size:.75rem;padding:18px 0}
+.print-only{display:none}
+@media(max-width:820px){
+ .grid4,.grid3{grid-template-columns:1fr 1fr}
+ .rule-grid,.rule-grid.prov{grid-template-columns:1fr 1fr}
+ .entry-values{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+ .grid2,.grid3,.grid4,.kpi-pair{grid-template-columns:1fr}
+ .header-title{font-size:1rem}
+ .nav{top:69px}
+ .rule-grid,.rule-grid.prov{grid-template-columns:1fr}
+ .monthbar select{width:100%}
+ .monthbar{align-items:stretch}
+}
+@media print{
+ header,.nav,.no-print,.install-btn,.actions,.footer-note{display:none!important}
+ body{background:#fff}
+ main{max-width:none;padding:0}
+ .section{display:none!important}
+ #dashboard{display:block!important}
+ .card,.metric{box-shadow:none;border:1px solid #bbb;break-inside:avoid}
+ .print-only{display:block}
+}
+</style>
+</head>
+<body>
+<header id="appHeader" class="hidden">
+  <div class="header-row">
+    <div>
+      <div class="header-title">Verkaufs- & Provisions-Tracker</div>
+      <div class="header-sub" id="headerUser">Persönlicher Tracker</div>
+    </div>
+    <button class="install-btn" id="installBtn">App installieren</button>
+  </div>
+</header>
+
+<main>
+  <div id="onboarding" class="onboarding hidden">
+    <div class="hero">
+      <h1>Verkaufs- & Provisions-Tracker</h1>
+      <p>Einmal einrichten, danach täglich nur noch Verkäufe und Stunden eintragen.</p>
+    </div>
+    <div class="card">
+      <div class="step-dots" id="stepDots"></div>
+
+      <div class="step active" data-step="0">
+        <h2>1. Dein Profil</h2>
+        <div class="grid2">
+          <div class="field"><label>Name (optional)</label><input id="obName" placeholder="z. B. Daniel"></div>
+          <div class="field"><label>Filiale (optional)</label><input id="obBranch" placeholder="z. B. A816"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Grundgehalt pro Monat (€)</label><input id="obBase" type="number" min="0" step="0.01"></div>
+          <div class="field"><label>Regulärer Stundenlohn (€)</label><input id="obHourly" type="number" min="0" step="0.01"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Wochenstunden</label><input id="obWeekly" type="number" min="0" step="0.1" value="37.5"></div>
+          <div class="field"><label>Monatliche Sollstunden</label><input id="obTarget" type="number" min="0" step="0.1" value="162.5"></div>
+        </div>
+      </div>
+
+      <div class="step" data-step="1">
+        <h2>2. Überstunden & Netto</h2>
+        <div class="grid2">
+          <div class="field"><label>Überstunden-Stundenlohn (€)</label><input id="obOvertime" type="number" min="0" step="0.01"></div>
+          <div class="field"><label>Überstunden-Zuschlag (%)</label><input id="obOvertimePct" type="number" min="0" step="0.1" value="0"></div>
+        </div>
+        <div class="field">
+          <label><input id="obNet" type="checkbox" style="width:auto;min-height:auto;margin-right:8px">Voraussichtliches Netto grob schätzen</label>
+          <div class="mini">Die Nettoanzeige ist nur eine unverbindliche Näherung.</div>
+        </div>
+        <div class="grid2" id="obTaxWrap">
+          <div class="field"><label>Steuerklasse</label>
+            <select id="obTaxClass"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+          </div>
+          <div class="field"><label>Kirchensteuer</label>
+            <select id="obChurch"><option value="false">Nein</option><option value="true">Ja</option></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-step="2">
+        <h2>3. Stückprämie</h2>
+        <p class="mini">Du kannst später beliebig viele Regeln anlegen. Für den Start reicht eine.</p>
+        <div class="grid3">
+          <div class="field"><label>Prämie pro</label>
+            <select id="obPieceBasis">
+              <option value="matratzen">Matratzen</option>
+              <option value="lattenroste">Lattenroste</option>
+              <option value="stuecke">Anzahl Stücke</option>
+              <option value="bons">Bons</option>
+            </select>
+          </div>
+          <div class="field"><label>Betrag je Einheit (€)</label><input id="obPieceValue" type="number" min="0" step="0.01" value="0"></div>
+          <div class="field"><label>Bezeichnung</label><input id="obPieceName" value="Stückprämie"></div>
+        </div>
+      </div>
+
+      <div class="step" data-step="3">
+        <h2>4. Umsatzprovision</h2>
+        <div class="field"><label>Berechnungsbasis</label>
+          <select id="obProvBasis"><option value="netto">Netto-Umsatz</option><option value="brutto">Brutto-Umsatz</option></select>
+        </div>
+        <p class="mini">Lege eine erste Provisionsstufe fest. Weitere Stufen kannst du später in den Einstellungen ergänzen.</p>
+        <div class="grid3">
+          <div class="field"><label>Ab Umsatz (€)</label><input id="obProvThreshold" type="number" min="0" step="0.01" value="0"></div>
+          <div class="field"><label>Art</label><select id="obProvType"><option value="prozent">Prozent</option><option value="fest">Fester Betrag</option></select></div>
+          <div class="field"><label>Wert</label><input id="obProvValue" type="number" min="0" step="0.01" value="0"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn secondary" id="obBack">Zurück</button>
+        <button class="btn primary" id="obNext">Weiter</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="nav no-print">
+      <button data-target="dashboard" class="active">Übersicht</button>
+      <button data-target="entry">Eintragen</button>
+      <button data-target="history">Tage</button>
+      <button data-target="settings">Einstellungen</button>
+      <button data-target="data">Daten</button>
+    </div>
+
+    <section id="dashboard" class="section active">
+      <div class="print-only"><h1>Monatsübersicht</h1><p id="printProfile"></p></div>
+      <div class="monthbar no-print">
+        <div>
+          <strong>Monat auswählen</strong>
+          <div class="mini">Alle alten Monate bleiben gespeichert.</div>
+        </div>
+        <select id="monthSelect"></select>
+      </div>
+
+      <div class="grid4" id="topMetrics"></div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Provision</h3>
+          <div id="provSummary"></div>
+        </div>
+        <div class="card">
+          <h3>Arbeitszeit</h3>
+          <div id="timeSummary"></div>
+        </div>
+      </div>
+
+      <div class="grid4" id="countMetrics"></div>
+
+      <div class="card">
+        <h3>Auszahlung / Brutto</h3>
+        <table>
+          <tr><td>Grundgehalt</td><td class="num" id="sumBase"></td></tr>
+          <tr><td>Überstundenvergütung</td><td class="num" id="sumOvertime"></td></tr>
+          <tr><td>Stückprämie</td><td class="num" id="sumPiece"></td></tr>
+          <tr><td>Umsatzprovision</td><td class="num" id="sumProv"></td></tr>
+          <tr><td><strong>Gesamtbrutto</strong></td><td class="num"><strong id="sumGross"></strong></td></tr>
+          <tr id="netRow" class="hidden"><td>Voraussichtliches Netto <span class="badge">Schätzung</span></td><td class="num" id="sumNet"></td></tr>
+        </table>
+      </div>
+
+      <div class="actions no-print">
+        <button class="btn navy" onclick="window.print()">Monatsübersicht drucken</button>
+        <button class="btn secondary" id="dashCsv">Monat als CSV</button>
+      </div>
+    </section>
+
+    <section id="entry" class="section">
+      <div class="card">
+        <h2 id="entryTitle">Tag eintragen</h2>
+        <input type="hidden" id="entryId">
+        <div class="grid2">
+          <div class="field"><label>Datum</label><input id="eDate" type="date"></div>
+          <div class="field"><label>Arbeitsstunden</label><input id="eHours" type="number" min="0" step="0.25"></div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label>Brutto-Umsatz (€)</label><input id="eGross" type="number" min="0" step="0.01"></div>
+          <div class="field"><label>Netto-Umsatz (€)</label><input id="eNet" type="number" min="0" step="0.01"></div>
+          <div class="field"><label>Finanzierung (€)</label><input id="eFinance" type="number" min="0" step="0.01"></div>
+        </div>
+        <div class="grid4">
+          <div class="field"><label>Bons</label><input id="eBons" type="number" min="0" step="1"></div>
+          <div class="field"><label>Matratzen</label><input id="eMattresses" type="number" min="0" step="1"></div>
+          <div class="field"><label>Lattenroste</label><input id="eSlats" type="number" min="0" step="1"></div>
+          <div class="field"><label>Anzahl Stücke</label><input id="ePieces" type="number" min="0" step="1"></div>
+        </div>
+        <div class="field">
+          <label>Stückprämie manuell (€) – optional</label>
+          <input id="ePieceManual" type="number" min="0" step="0.01" placeholder="Leer lassen = automatisch nach Regeln">
+        </div>
+        <div class="field"><label>Notiz (optional)</label><textarea id="eNote"></textarea></div>
+        <div id="autoPieceHint" class="notice info"></div>
+        <div class="actions">
+          <button class="btn primary" id="saveEntry">Speichern</button>
+          <button class="btn secondary hidden" id="cancelEdit">Bearbeiten abbrechen</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="history" class="section">
+      <div class="monthbar">
+        <div><h2 style="margin:0">Tagesübersicht</h2><div class="mini">Einträge bearbeiten oder löschen.</div></div>
+        <select id="historyMonth"></select>
+      </div>
+      <div id="entryList"></div>
+    </section>
+
+    <section id="settings" class="section">
+      <div class="card">
+        <h2>Persönliche Einstellungen</h2>
+        <div class="grid2">
+          <div class="field"><label>Name</label><input id="sName"></div>
+          <div class="field"><label>Filiale</label><input id="sBranch"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Grundgehalt pro Monat (€)</label><input id="sBase" type="number" min="0" step="0.01"></div>
+          <div class="field"><label>Regulärer Stundenlohn (€)</label><input id="sHourly" type="number" min="0" step="0.01"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Wochenstunden</label><input id="sWeekly" type="number" min="0" step="0.1"></div>
+          <div class="field"><label>Monatliche Sollstunden</label><input id="sTarget" type="number" min="0" step="0.1"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>Überstunden-Stundenlohn (€)</label><input id="sOvertime" type="number" min="0" step="0.01"></div>
+          <div class="field"><label>Überstunden-Zuschlag (%)</label><input id="sOvertimePct" type="number" min="0" step="0.1"></div>
+        </div>
+        <div class="field"><label>Provisionsbasis</label><select id="sProvBasis"><option value="netto">Netto-Umsatz</option><option value="brutto">Brutto-Umsatz</option></select></div>
+        <div class="grid2">
+          <div class="field"><label><input id="sNetEstimate" type="checkbox" style="width:auto;min-height:auto;margin-right:8px">Netto-Schätzung anzeigen</label></div>
+          <div class="field"><label>Steuerklasse</label><select id="sTaxClass"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        </div>
+        <div class="field"><label>Kirchensteuer</label><select id="sChurch"><option value="false">Nein</option><option value="true">Ja</option></select></div>
+        <div class="actions"><button class="btn primary" id="saveSettings">Einstellungen speichern</button></div>
+      </div>
+
+      <div class="card">
+        <h2>Stückprämien-Regeln</h2>
+        <div id="pieceRules"></div>
+        <button class="btn secondary" id="addPieceRule">+ Regel hinzufügen</button>
+      </div>
+
+      <div class="card">
+        <h2>Umsatzprovisions-Stufen</h2>
+        <div id="provRules"></div>
+        <button class="btn secondary" id="addProvRule">+ Stufe hinzufügen</button>
+      </div>
+
+      <div class="card">
+        <h2>Profil zurücksetzen</h2>
+        <div class="notice warn">Damit werden persönliche Einstellungen und alle gespeicherten Tagesdaten gelöscht.</div>
+        <button class="btn danger" id="resetProfile">Profil & Daten löschen</button>
+      </div>
+    </section>
+
+    <section id="data" class="section">
+      <div class="card">
+        <h2>Daten sichern & übertragen</h2>
+        <p class="mini">Ideal, wenn du das Handy wechselst oder eine Sicherheitskopie willst.</p>
+        <div class="actions">
+          <button class="btn navy" id="exportJson">Datensicherung als JSON</button>
+          <label class="btn secondary" style="display:inline-block">JSON wieder importieren
+            <input id="importJson" type="file" accept=".json,application/json" style="display:none">
+          </label>
+          <button class="btn secondary" id="exportAllCsv">Alle Einträge als CSV</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Hinweis zur Speicherung</h2>
+        <div class="notice info">Alle persönlichen Daten und Verkaufszahlen bleiben lokal auf diesem Gerät. Die App sendet diese Daten nicht an einen Server.</div>
+      </div>
+    </section>
+
+    <div class="footer-note">Verkaufs- & Provisions-Tracker · lokale Daten · PWA</div>
+  </div>
+</main>
+
+<script>
+const KEY='verkaufs-provisions-tracker-v1';
+let db = loadDb();
+let currentMonth = monthKey(new Date());
+let deferredPrompt=null;
+let obStep=0;
+
+function emptyProfile(){
+  return {
+    name:'',branch:'',baseSalary:0,hourlyRate:0,weeklyHours:37.5,targetHours:162.5,
+    overtimeRate:0,overtimeBonusPct:0,pieceRules:[],commissionTiers:[],commissionBasis:'netto',
+    netEstimate:false,taxClass:1,churchTax:false
+  };
+}
+function loadDb(){
+  try{
+    const x=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(x&&x.version===1) return x;
+  }catch(e){}
+  return {version:1,profile:null,entries:[]};
+}
+function saveDb(){localStorage.setItem(KEY,JSON.stringify(db))}
+function euro(n){return new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(Number(n)||0)}
+function num(v){return Math.max(0,Number(v)||0)}
+function monthKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function monthLabel(k){const [y,m]=k.split('-').map(Number);return new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(new Date(y,m-1,1))}
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function id(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)}
+function el(x){return document.getElementById(x)}
+function basisLabel(b){return {matratzen:'Matratzen',lattenroste:'Lattenroste',stuecke:'Anzahl Stücke',bons:'Bons'}[b]||b}
+function entriesOfMonth(m){return db.entries.filter(e=>e.date.slice(0,7)===m)}
+function autoPieceForEntry(e){
+  return (db.profile?.pieceRules||[]).reduce((s,r)=>{
+    const qty = r.basis==='matratzen'?e.mattresses:r.basis==='lattenroste'?e.slats:r.basis==='stuecke'?e.pieces:e.bons;
+    return s + qty*num(r.value);
+  },0)
+}
+function pieceForEntry(e){return e.pieceManual===null||e.pieceManual===''||e.pieceManual===undefined?autoPieceForEntry(e):num(e.pieceManual)}
+function sortedTiers(){return [...(db.profile?.commissionTiers||[])].sort((a,b)=>num(a.threshold)-num(b.threshold))}
+function commissionFor(amount){
+  const tiers=sortedTiers();
+  let active=null,next=null;
+  for(const t of tiers){if(amount>=num(t.threshold)) active=t; else {next=t;break}}
+  const value=active?(active.type==='fixed'?num(active.value):amount*num(active.value)/100):0;
+  return {active,next,value,missing:next?Math.max(0,num(next.threshold)-amount):null}
+}
+function calcMonth(m){
+  const es=entriesOfMonth(m);
+  const s=k=>es.reduce((a,e)=>a+num(e[k]),0);
+  const p=db.profile||emptyProfile();
+  const gross=s('gross'), net=s('net'), hours=s('hours'), finance=s('finance'), bons=s('bons'), mattresses=s('mattresses'), slats=s('slats'), pieces=s('pieces');
+  const piece=es.reduce((a,e)=>a+pieceForEntry(e),0);
+  const basis=p.commissionBasis==='brutto'?gross:net;
+  const c=commissionFor(basis);
+  const overtime=Math.max(0,hours-num(p.targetHours));
+  const overtimePay=overtime*num(p.overtimeRate)*(1+num(p.overtimeBonusPct)/100);
+  const totalGross=num(p.baseSalary)+overtimePay+piece+c.value;
+  return {
+    gross,net,hours,finance,bons,mattresses,slats,pieces,piece,commission:c.value,
+    activeTier:c.active,nextTier:c.next,missing:c.missing,basis,overtime,overtimePay,totalGross,
+    slatQuote:mattresses>0?slats/mattresses*100:null,piecesPerBon:bons>0?pieces/bons:null,
+    estimatedNet:p.netEstimate?estimateNet(totalGross,p):null
+  };
+}
+function estimateNet(gross,p){
+  if(gross<=0)return 0;
+  let social=gross*0.205;
+  let taxable=Math.max(0,gross-social);
+  let taxRate=taxable<1200?0:taxable<2500?.10:taxable<4000?.17:taxable<6000?.23:.28;
+  if(Number(p.taxClass)===3)taxRate*=.72;
+  if([5,6].includes(Number(p.taxClass)))taxRate*=1.28;
+  if(Number(p.taxClass)===2)taxRate*=.92;
+  let tax=taxable*taxRate;
+  let church=p.churchTax?tax*.09:0;
+  return Math.max(0,gross-social-tax-church);
+}
+function showToast(msg,type='good'){
+  let n=document.createElement('div');n.className='notice '+type;n.style.position='fixed';n.style.left='12px';n.style.right='12px';n.style.bottom='14px';n.style.zIndex='9999';n.textContent=msg;
+  document.body.appendChild(n);setTimeout(()=>n.remove(),3200)
+}
+function download(name,text,type){
+  const b=new Blob([text],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)
+}
+function csvEscape(v){const s=String(v??'');return /[;"\n]/.test(s)?'"'+s.replaceAll('"','""')+'"':s}
+function entriesCsv(entries){
+  const head=['Datum','Arbeitsstunden','Brutto-Umsatz','Netto-Umsatz','Finanzierung','Stückprämie','Bons','Matratzen','Lattenroste','Anzahl Stücke','Notiz'];
+  const rows=entries.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>[
+    e.date,e.hours,e.gross,e.net,e.finance,pieceForEntry(e),e.bons,e.mattresses,e.slats,e.pieces,e.note||''
+  ]);
+  return '\ufeff'+[head,...rows].map(r=>r.map(csvEscape).join(';')).join('\n');
+}
+
+function start(){
+  if(!db.profile){
+    el('onboarding').classList.remove('hidden');buildDots();showObStep();
+  }else{
+    el('appHeader').classList.remove('hidden');el('app').classList.remove('hidden');initApp();
+  }
+}
+function buildDots(){el('stepDots').innerHTML=[0,1,2,3].map(i=>`<span class="${i===obStep?'active':''}"></span>`).join('')}
+function showObStep(){
+  document.querySelectorAll('.step').forEach((x,i)=>x.classList.toggle('active',i===obStep));
+  el('obBack').style.visibility=obStep===0?'hidden':'visible';
+  el('obNext').textContent=obStep===3?'Einrichtung abschließen':'Weiter';
+  buildDots();
+}
+el('obBack').onclick=()=>{if(obStep>0){obStep--;showObStep()}};
+el('obNext').onclick=()=>{
+  if(obStep<3){obStep++;showObStep();return}
+  const p=emptyProfile();
+  p.name=el('obName').value.trim();p.branch=el('obBranch').value.trim();p.baseSalary=num(el('obBase').value);p.hourlyRate=num(el('obHourly').value);
+  p.weeklyHours=num(el('obWeekly').value);p.targetHours=num(el('obTarget').value);p.overtimeRate=num(el('obOvertime').value)||p.hourlyRate;
+  p.overtimeBonusPct=num(el('obOvertimePct').value);p.netEstimate=el('obNet').checked;p.taxClass=Number(el('obTaxClass').value);p.churchTax=el('obChurch').value==='true';
+  p.pieceRules=[{id:id(),name:el('obPieceName').value.trim()||'Stückprämie',basis:el('obPieceBasis').value,value:num(el('obPieceValue').value)}];
+  p.commissionBasis=el('obProvBasis').value;p.commissionTiers=[{id:id(),threshold:num(el('obProvThreshold').value),type:el('obProvType').value,value:num(el('obProvValue').value)}];
+  db.profile=p;saveDb();location.reload();
+};
+
+function initApp(){
+  const p=db.profile;
+  el('headerUser').textContent=[p.name,p.branch].filter(Boolean).join(' · ')||'Persönlicher Tracker';
+  el('eDate').value=today();
+  setupNav();refreshMonths();loadSettings();renderRules();renderDashboard();renderHistory();updatePieceHint();
+  document.querySelectorAll('#entry input').forEach(i=>i.addEventListener('input',updatePieceHint));
+}
+function setupNav(){
+  document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');el(b.dataset.target).classList.add('active');
+    if(b.dataset.target==='dashboard')renderDashboard();
+    if(b.dataset.target==='history')renderHistory();
+    if(b.dataset.target==='settings'){loadSettings();renderRules()}
+  });
+}
+function allMonths(){
+  let s=new Set(db.entries.map(e=>e.date.slice(0,7)));s.add(monthKey(new Date()));return [...s].sort().reverse();
+}
+function refreshMonths(){
+  const opts=allMonths().map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join('');
+  el('monthSelect').innerHTML=opts;el('historyMonth').innerHTML=opts;
+  if(!allMonths().includes(currentMonth))currentMonth=allMonths()[0];
+  el('monthSelect').value=currentMonth;el('historyMonth').value=currentMonth;
+}
+el('monthSelect').onchange=e=>{currentMonth=e.target.value;el('historyMonth').value=currentMonth;renderDashboard()};
+el('historyMonth').onchange=e=>{currentMonth=e.target.value;el('monthSelect').value=currentMonth;renderHistory()};
+
+function renderDashboard(){
+  refreshMonths();
+  const a=calcMonth(currentMonth),p=db.profile;
+  el('printProfile').textContent=[p.name,p.branch,monthLabel(currentMonth)].filter(Boolean).join(' · ');
+  el('topMetrics').innerHTML=[
+    ['Brutto-Umsatz',euro(a.gross)],['Netto-Umsatz',euro(a.net)],['Stückprämie',euro(a.piece)],['Umsatzprovision',euro(a.commission)]
+  ].map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('');
+  let tierText=a.activeTier?`Aktuelle Stufe: ab ${euro(a.activeTier.threshold)} · ${a.activeTier.type==='fixed'?euro(a.activeTier.value):a.activeTier.value+' %'}`:'Noch keine Provisionsstufe erreicht';
+  let next=a.nextTier?`Bis zur nächsten Stufe fehlen noch <strong>${euro(a.missing)}</strong>.`:'Höchste Provisionsstufe erreicht.';
+  let pct=a.nextTier?Math.min(100,a.basis/Math.max(1,a.nextTier.threshold)*100):100;
+  el('provSummary').innerHTML=`<p>${tierText}</p><p>${next}</p><div class="mini">Basis: ${p.commissionBasis==='brutto'?'Brutto-Umsatz':'Netto-Umsatz'} · ${euro(a.basis)}</div><div class="progress"><div style="width:${pct}%"></div></div>`;
+  el('timeSummary').innerHTML=`<div class="kpi-pair"><div class="metric"><small>Ist-Stunden</small><strong>${a.hours.toFixed(2)}</strong></div><div class="metric"><small>Sollstunden</small><strong>${num(p.targetHours).toFixed(2)}</strong></div><div class="metric"><small>Überstunden</small><strong>${a.overtime.toFixed(2)}</strong></div><div class="metric"><small>Überstundenvergütung</small><strong>${euro(a.overtimePay)}</strong></div></div>`;
+  el('countMetrics').innerHTML=[
+    ['Matratzen',a.mattresses],['Lattenroste',a.slats],['Anzahl Stücke',a.pieces],['Bons',a.bons],
+    ['Lattenrost-Quote',a.slatQuote===null?'–':a.slatQuote.toFixed(1)+' %'],['Stück pro Bon',a.piecesPerBon===null?'–':a.piecesPerBon.toFixed(2)],['Finanzierung',euro(a.finance)],['Arbeitstage',entriesOfMonth(currentMonth).length]
+  ].map(x=>`<div class="metric"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('');
+  el('sumBase').textContent=euro(p.baseSalary);el('sumOvertime').textContent=euro(a.overtimePay);el('sumPiece').textContent=euro(a.piece);el('sumProv').textContent=euro(a.commission);el('sumGross').textContent=euro(a.totalGross);
+  el('netRow').classList.toggle('hidden',!p.netEstimate);el('sumNet').textContent=a.estimatedNet===null?'–':euro(a.estimatedNet);
+}
+function currentEntryDraft(){
+  return {date:el('eDate').value,hours:num(el('eHours').value),gross:num(el('eGross').value),net:num(el('eNet').value),finance:num(el('eFinance').value),
+    bons:num(el('eBons').value),mattresses:num(el('eMattresses').value),slats:num(el('eSlats').value),pieces:num(el('ePieces').value),
+    pieceManual:el('ePieceManual').value===''?null:num(el('ePieceManual').value),note:el('eNote').value.trim()}
+}
+function updatePieceHint(){
+  if(!db.profile)return;const x=currentEntryDraft();const auto=autoPieceForEntry(x);
+  el('autoPieceHint').innerHTML=`Automatische Stückprämie nach deinen Regeln: <strong>${euro(auto)}</strong>${x.pieceManual!==null?` · Manuell verwendet: <strong>${euro(x.pieceManual)}</strong>`:''}`;
+}
+el('saveEntry').onclick=()=>{
+  const x=currentEntryDraft();if(!x.date){showToast('Bitte ein Datum eingeben.','bad');return}
+  const editId=el('entryId').value;
+  if(editId){
+    const i=db.entries.findIndex(e=>e.id===editId);if(i>=0)db.entries[i]={...x,id:editId};
+  }else db.entries.push({...x,id:id()});
+  saveDb();currentMonth=x.date.slice(0,7);clearEntryForm();refreshMonths();renderDashboard();renderHistory();showToast(editId?'Eintrag aktualisiert.':'Eintrag gespeichert.');
+};
+function clearEntryForm(){
+  el('entryId').value='';el('entryTitle').textContent='Tag eintragen';el('cancelEdit').classList.add('hidden');
+  ['eHours','eGross','eNet','eFinance','eBons','eMattresses','eSlats','ePieces','ePieceManual','eNote'].forEach(x=>el(x).value='');el('eDate').value=today();updatePieceHint()
+}
+el('cancelEdit').onclick=clearEntryForm;
+function editEntry(i){
+  const e=db.entries.find(x=>x.id===i);if(!e)return;
+  el('entryId').value=e.id;el('entryTitle').textContent='Tag bearbeiten';el('eDate').value=e.date;el('eHours').value=e.hours;el('eGross').value=e.gross;el('eNet').value=e.net;el('eFinance').value=e.finance;el('eBons').value=e.bons;el('eMattresses').value=e.mattresses;el('eSlats').value=e.slats;el('ePieces').value=e.pieces;el('ePieceManual').value=e.pieceManual??'';el('eNote').value=e.note||'';el('cancelEdit').classList.remove('hidden');updatePieceHint();
+  document.querySelector('[data-target="entry"]').click();window.scrollTo({top:0,behavior:'smooth'})
+}
+function deleteEntry(i){
+  if(!confirm('Diesen Tages-Eintrag wirklich löschen?'))return;db.entries=db.entries.filter(x=>x.id!==i);saveDb();refreshMonths();renderHistory();renderDashboard();showToast('Eintrag gelöscht.')
+}
+function renderHistory(){
+  refreshMonths();el('historyMonth').value=currentMonth;
+  const es=entriesOfMonth(currentMonth).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!es.length){el('entryList').innerHTML='<div class="card"><div class="notice info">Für diesen Monat gibt es noch keine Einträge.</div></div>';return}
+  el('entryList').innerHTML=es.map(e=>`<div class="entry-card">
+    <div class="entry-top"><div><strong>${new Intl.DateTimeFormat('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(e.date+'T12:00:00'))}</strong>${e.note?`<div class="mini">${escapeHtml(e.note)}</div>`:''}</div>
+    <div class="actions"><button class="btn outline" onclick="editEntry('${e.id}')">Bearbeiten</button><button class="btn danger" onclick="deleteEntry('${e.id}')">Löschen</button></div></div>
+    <div class="entry-values">
+      <div><small>Stunden</small><strong>${num(e.hours).toFixed(2)}</strong></div>
+      <div><small>Brutto-Umsatz</small><strong>${euro(e.gross)}</strong></div>
+      <div><small>Netto-Umsatz</small><strong>${euro(e.net)}</strong></div>
+      <div><small>Stückprämie</small><strong>${euro(pieceForEntry(e))}</strong></div>
+      <div><small>Matratzen</small><strong>${e.mattresses}</strong></div>
+      <div><small>Lattenroste</small><strong>${e.slats}</strong></div>
+      <div><small>Anzahl Stücke</small><strong>${e.pieces}</strong></div>
+      <div><small>Bons</small><strong>${e.bons}</strong></div>
+    </div>
+  </div>`).join('');
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+function loadSettings(){
+  const p=db.profile;el('sName').value=p.name||'';el('sBranch').value=p.branch||'';el('sBase').value=p.baseSalary;el('sHourly').value=p.hourlyRate;el('sWeekly').value=p.weeklyHours;el('sTarget').value=p.targetHours;el('sOvertime').value=p.overtimeRate;el('sOvertimePct').value=p.overtimeBonusPct;el('sProvBasis').value=p.commissionBasis;el('sNetEstimate').checked=p.netEstimate;el('sTaxClass').value=p.taxClass;el('sChurch').value=String(p.churchTax)
+}
+el('saveSettings').onclick=()=>{
+  const p=db.profile;p.name=el('sName').value.trim();p.branch=el('sBranch').value.trim();p.baseSalary=num(el('sBase').value);p.hourlyRate=num(el('sHourly').value);p.weeklyHours=num(el('sWeekly').value);p.targetHours=num(el('sTarget').value);p.overtimeRate=num(el('sOvertime').value);p.overtimeBonusPct=num(el('sOvertimePct').value);p.commissionBasis=el('sProvBasis').value;p.netEstimate=el('sNetEstimate').checked;p.taxClass=Number(el('sTaxClass').value);p.churchTax=el('sChurch').value==='true';saveDb();el('headerUser').textContent=[p.name,p.branch].filter(Boolean).join(' · ')||'Persönlicher Tracker';renderDashboard();showToast('Einstellungen gespeichert.')
+}
+function renderRules(){
+  const p=db.profile;
+  el('pieceRules').innerHTML=p.pieceRules.map(r=>`<div class="rule"><div class="rule-grid">
+    <div class="field"><label>Bezeichnung</label><input value="${escapeHtml(r.name)}" onchange="updatePieceRule('${r.id}','name',this.value)"></div>
+    <div class="field"><label>Basis</label><select onchange="updatePieceRule('${r.id}','basis',this.value)">
+      ${['matratzen','lattenroste','stuecke','bons'].map(x=>`<option value="${x}" ${r.basis===x?'selected':''}>${basisLabel(x)}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>€ je Einheit</label><input type="number" min="0" step="0.01" value="${r.value}" onchange="updatePieceRule('${r.id}','value',this.value)"></div>
+    <button class="btn danger" onclick="removePieceRule('${r.id}')">Löschen</button>
+  </div></div>`).join('')||'<div class="notice info">Noch keine Stückprämien-Regel.</div>';
+  el('provRules').innerHTML=p.commissionTiers.map(r=>`<div class="rule"><div class="rule-grid prov">
+    <div class="field"><label>Ab Umsatz (€)</label><input type="number" min="0" step="0.01" value="${r.threshold}" onchange="updateProvRule('${r.id}','threshold',this.value)"></div>
+    <div class="field"><label>Art</label><select onchange="updateProvRule('${r.id}','type',this.value)"><option value="prozent" ${r.type==='prozent'?'selected':''}>Prozent</option><option value="fixed" ${r.type==='fixed'?'selected':''}>Fester Betrag</option></select></div>
+    <div class="field"><label>Wert</label><input type="number" min="0" step="0.01" value="${r.value}" onchange="updateProvRule('${r.id}','value',this.value)"></div>
+    <button class="btn danger" onclick="removeProvRule('${r.id}')">Löschen</button>
+  </div></div>`).join('')||'<div class="notice info">Noch keine Provisionsstufe.</div>';
+}
+el('addPieceRule').onclick=()=>{db.profile.pieceRules.push({id:id(),name:'Neue Stückprämie',basis:'matratzen',value:0});saveDb();renderRules();updatePieceHint()};
+el('addProvRule').onclick=()=>{db.profile.commissionTiers.push({id:id(),threshold:0,type:'prozent',value:0});saveDb();renderRules();renderDashboard()};
+function updatePieceRule(i,k,v){let r=db.profile.pieceRules.find(x=>x.id===i);if(!r)return;r[k]=k==='value'?num(v):v;saveDb();updatePieceHint();renderDashboard()}
+function removePieceRule(i){db.profile.pieceRules=db.profile.pieceRules.filter(x=>x.id!==i);saveDb();renderRules();updatePieceHint();renderDashboard()}
+function updateProvRule(i,k,v){let r=db.profile.commissionTiers.find(x=>x.id===i);if(!r)return;r[k]=['threshold','value'].includes(k)?num(v):v;saveDb();renderDashboard()}
+function removeProvRule(i){db.profile.commissionTiers=db.profile.commissionTiers.filter(x=>x.id!==i);saveDb();renderRules();renderDashboard()}
+el('resetProfile').onclick=()=>{if(confirm('Wirklich Profil UND alle Verkaufsdaten löschen?')){localStorage.removeItem(KEY);location.reload()}};
+
+el('dashCsv').onclick=()=>download(`Verkaufsdaten_${currentMonth}.csv`,entriesCsv(entriesOfMonth(currentMonth)),'text/csv;charset=utf-8');
+el('exportAllCsv').onclick=()=>download('Verkaufsdaten_alle.csv',entriesCsv([...db.entries]),'text/csv;charset=utf-8');
+el('exportJson').onclick=()=>download('Verkaufs_Provisions_Tracker_Backup.json',JSON.stringify(db,null,2),'application/json');
+el('importJson').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  try{
+    const x=JSON.parse(await f.text());if(!x||x.version!==1||!Array.isArray(x.entries))throw new Error();
+    if(!confirm('Vorhandene Daten durch diese Sicherung ersetzen?'))return;
+    db=x;saveDb();location.reload();
+  }catch(err){showToast('Die JSON-Datei ist keine gültige Sicherung.','bad')}
+};
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))}
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;el('installBtn').style.display='inline-block'});
+el('installBtn').onclick=async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;el('installBtn').style.display='none'};
+window.addEventListener('appinstalled',()=>el('installBtn').style.display='none');
+
+start();
+</script>
+</body>
+</html>
